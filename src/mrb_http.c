@@ -6,7 +6,7 @@
 #include <mruby/array.h>
 #include <mruby/class.h>
 #include <mruby/variable.h>
-#include <http_parser.h>
+#include <_http_parser.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -30,7 +30,7 @@ typedef struct {
 static void
 http_parser_context_free(mrb_state *mrb, void *p)
 {
-  free(p);
+  mrb_free(mrb,p);
 }
 
 static const struct mrb_data_type
@@ -41,7 +41,7 @@ http_parser_context_type = {
 static void
 http_url_free(mrb_state *mrb, void *p)
 {
-  free(p);
+  mrb_free(mrb,p);
 }
 
 static const struct mrb_data_type http_url_type = {
@@ -191,7 +191,7 @@ mrb_http_parser_init(mrb_state *mrb, mrb_value self)
 {
   mrb_http_parser_context* context = NULL;
 
-  context = (mrb_http_parser_context*) malloc(sizeof(mrb_http_parser_context));
+  context = (mrb_http_parser_context*) mrb_malloc(mrb,sizeof(mrb_http_parser_context));
   memset(context, 0, sizeof(mrb_http_parser_context));
   context->mrb = mrb;
   context->instance = mrb_nil_value();
@@ -561,7 +561,7 @@ mrb_http_url_encode(mrb_state *mrb, mrb_value self) {
   len = RSTRING_LEN(arg);
 
   pstr = str;
-  buf = malloc(strlen(str) * 3 + 1);
+  buf = mrb_malloc(mrb,strlen(str) * 3 + 1);
   pbuf = buf;
   while (pstr - str < len) {
     char c = *pstr;
@@ -578,7 +578,7 @@ mrb_http_url_encode(mrb_state *mrb, mrb_value self) {
   }
   *pbuf = '\0';
   arg = mrb_str_new(mrb, buf, pbuf - buf);
-  free(buf);
+  mrb_free(mrb,buf);
   return arg;
 }
 
@@ -594,7 +594,7 @@ mrb_http_url_decode(mrb_state *mrb, mrb_value self) {
   len = RSTRING_LEN(arg);
 
   pstr = str;
-  buf = malloc(len + 1);
+  buf = mrb_malloc(mrb,len + 1);
   pbuf = buf;
   while (pstr - str < len) {
     if (*pstr == '%' && pstr - str + 2 < len) {
@@ -614,7 +614,7 @@ mrb_http_url_decode(mrb_state *mrb, mrb_value self) {
   }
   *pbuf = '\0';
   arg = mrb_str_new(mrb, buf, pbuf - buf);
-  free(buf);
+  mrb_free(mrb,buf);
   return arg;
 }
 
